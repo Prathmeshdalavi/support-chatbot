@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin Audit Logs</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-dark bg-danger px-3 shadow">
+        <a class="navbar-brand" href="#">System Conversation Streams</a>
+        <a href="/logout" class="btn btn-sm btn-outline-light">Logout</a>
+    </nav>
+    <div class="container my-5">
+        <h2 class="mb-4 text-dark">Live Global Conversations Audit</h2>
+        <div class="card border-0 shadow">
+            <table class="table table-striped mb-0 align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Timestamp</th>
+                        <th>User Account</th>
+                        <th>Party Type</th>
+                        <th>Message Data Payload</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="log : ${logs}">
+                        <td th:text="${log.id}"></td>
+                        <td th:text="${log.timestamp}"></td>
+                        <td th:text="${log.user != null ? log.user.username : 'Guest'}"></td>
+                        <td>
+                            <span th:class="${log.sender == 'USER'} ? 'badge bg-primary' : 'badge bg-warning text-dark'" th:text="${log.sender}"></span>
+                        </td>
+                        <td th:text="${log.content}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
