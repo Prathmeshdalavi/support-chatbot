@@ -1,10 +1,20 @@
-# Build stage using Maven and JDK 17
+# ==========================================
+# STAGE 1: Memory-Optimized Build
+# ==========================================
 FROM maven:3.8.5-openjdk-17 AS build
 COPY . .
-RUN mvn clean package -DskipTests
 
-# Run stage
+# MAVEN_OPTS limits JVM memory usage so Render's free tier doesn't crash.
+# -Dmaven.test.skip=true skips compilation and execution of test classes.
+ENV MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=256m"
+RUN mvn clean package -Dmaven.test.skip=true -DskipTests
+
+# ==========================================
+# STAGE 2: Lightweight Runtime Environment
+# ==========================================
 FROM openjdk:17-jdk-slim
 COPY --from=build /target/*.jar app.jar
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","app.jar"]
+
+# Run with controlled memory optimization flags in production
+ENTRYPOINT ["java", "-Xmx300m", "-jar", "app.jar"]
