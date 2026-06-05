@@ -1,10 +1,10 @@
-# Step 1: Build the application using Maven
+# Build stage using Maven and JDK 17
 FROM maven:3.8.5-openjdk-17 AS build
 COPY . .
 RUN mvn clean package -DskipTests
 
-# Step 2: Create the runtime execution environment
+# Run stage
 FROM openjdk:17-jdk-slim
-COPY --from=build /target/chatbot-0.0.1-SNAPSHOT.jar chatbot.jar
+COPY --from=build /target/*.jar app.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "chatbot.jar"]
+ENTRYPOINT ["java","-jar","app.jar"]
