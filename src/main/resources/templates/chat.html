@@ -4,17 +4,21 @@
 <head>
     <title>AI Agent Support Portal</title>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
+    <!-- Bootstrap 5 CSS & JS Bundles -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     
+    <!-- Google Fonts for Modern Typography -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- Code Highlight & Markdown Support -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     
+    <!-- STOMP & SockJS for WebSockets -->
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 
@@ -23,6 +27,8 @@
             font-family: 'Inter', sans-serif;
             background-color: #f8f9fa;
             height: 100vh;
+            /* Support for mobile browser address bars */
+            height: -webkit-fill-available; 
             margin: 0;
             overflow: hidden;
         }
@@ -30,11 +36,13 @@
         .wrapper {
             display: flex;
             height: 100vh;
+            height: -webkit-fill-available;
             width: 100vw;
             position: relative;
+            overflow: hidden;
         }
 
-        /* Responsive Sidebar Sidebar Panel */
+        /* Responsive Sidebar Panel */
         .sidebar {
             background-color: #1e293b;
             color: #f8fafc;
@@ -44,33 +52,36 @@
             flex-direction: column;
             justify-content: space-between;
             padding: 1.5rem;
-            transition: all 0.3s ease;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 1040;
+            height: 100%;
         }
 
         /* Main Chat Area Layout Container */
         .chat-layout {
             flex-grow: 1;
-            height: 100vh;
+            height: 100%;
             display: flex;
             flex-direction: column;
             background-color: #ffffff;
-            min-width: 0; /* Prevents flex items from breaking layout boundaries */
+            min-width: 0;
+            position: relative;
         }
 
         .chat-header {
             border-bottom: 1px solid #e2e8f0;
-            padding: 1rem 1.5rem;
+            padding: 1rem;
             background-color: #ffffff;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            flex-shrink: 0;
         }
 
         #chat-box {
-            flex: 1;
+            flex: 1 1 auto;
             overflow-y: auto;
-            padding: 1.5rem;
+            padding: 1rem;
             background-color: #f8fafc;
             display: flex;
             flex-direction: column;
@@ -117,9 +128,10 @@
         code { font-size: 0.85rem; white-space: pre-wrap; word-break: break-all; }
 
         .chat-footer {
-            padding: 1rem 1.5rem;
+            padding: 1rem;
             background-color: #ffffff;
             border-top: 1px solid #e2e8f0;
+            flex-shrink: 0;
         }
 
         .input-group-custom {
@@ -129,6 +141,7 @@
             display: flex;
             align-items: center;
             border: 1px solid #cbd5e1;
+            width: 100%;
         }
 
         .input-group-custom input {
@@ -137,29 +150,24 @@
             box-shadow: none !important;
             padding-left: 0.75rem;
             font-size: 0.95rem;
+            flex-grow: 1;
         }
 
         /* ==========================================
-           MOBILE RESPONSIVE MEDIA QUERIES (CSS Breakpoints)
+           HYBRID MOBILE & DESKTOP-SITE OVERRIDES
            ========================================== */
-        @media (max-width: 768px) {
+        @media (max-width: 991px) {
             .sidebar {
                 position: absolute;
-                left: -260px; /* Hide sidebar completely offscreen on phones */
-                height: 100%;
+                transform: translateX(-100%);
             }
             
-            /* Class toggled by JavaScript hamburger button */
             .sidebar.active {
-                left: 0; 
+                transform: translateX(0);
             }
 
             .msg {
-                max-width: 90%; /* Allow wider chat text space on small screens */
-            }
-
-            .chat-footer {
-                padding: 0.75rem 1rem;
+                max-width: 90%;
             }
         }
     </style>
@@ -168,11 +176,12 @@
 <body>
     <div class="wrapper">
         
+        <!-- SIDEBAR DRAWER -->
         <div class="sidebar" id="sidebarMenu">
             <div>
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h5 class="fw-bold text-white m-0">⚡ Neon AI</h5>
-                    <button class="btn-close btn-close-white d-md-none" onclick="toggleMobileSidebar()"></button>
+                    <button class="btn-close btn-close-white" onclick="toggleMobileSidebar()"></button>
                 </div>
                 <hr class="text-secondary">
                 <div class="mb-4">
@@ -189,11 +198,13 @@
             </div>
         </div>
 
+        <!-- MAIN VIEW PANELS -->
         <div class="chat-layout">
             <div class="chat-header shadow-sm">
                 <div class="d-flex align-items-center">
-                    <button class="btn btn-outline-dark d-md-none me-3 px-2 py-1" onclick="toggleMobileSidebar()">
-                        ☰
+                    <!-- Always visible toggle menu to fix mobile layout breaks -->
+                    <button class="btn btn-outline-dark me-3 px-2 py-1" onclick="toggleMobileSidebar()">
+                        ☰ Menu
                     </button>
                     <div>
                         <h6 class="fw-bold mb-0 text-dark">Live AI Chat Agent</h6>
@@ -202,6 +213,7 @@
                 </div>
             </div>
 
+            <!-- MESSAGES CONTAINER VIEWPORT -->
             <div id="chat-box">
                 <div th:each="msg : ${history}" 
                      th:class="${msg.sender == 'USER'} ? 'msg user' : 'msg ai'"
@@ -211,6 +223,7 @@
                 </div>
             </div>
 
+            <!-- STICKY INPUT CONTAINER PANEL -->
             <div class="chat-footer">
                 <div class="input-group-custom shadow-sm">
                     <input type="text" id="user-input" class="form-control" placeholder="Ask a question...">
@@ -221,12 +234,12 @@
 
     </div>
 
+    <!-- Backdrop overlay container -->
     <div id="sidebarOverlay" onclick="toggleMobileSidebar()" style="display:none; position:absolute; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:1030;"></div>
 
     <script>
         let stompClient = null;
 
-        // Toggles mobile side drawer control layouts
         function toggleMobileSidebar() {
             const sidebar = document.getElementById("sidebarMenu");
             const overlay = document.getElementById("sidebarOverlay");
@@ -274,8 +287,7 @@
                 .then(response => {
                     if (response.ok) {
                         document.getElementById("chat-box").innerHTML = "";
-                        // Close sidebar drawer auto on mobile screens after action completes
-                        if(window.innerWidth <= 768) toggleMobileSidebar();
+                        toggleMobileSidebar();
                     } else {
                         alert("Failed to clear chat history.");
                     }
